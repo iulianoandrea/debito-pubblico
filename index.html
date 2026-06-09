@@ -1,103 +1,150 @@
 <!doctype html>
 <html lang="it">
 <head>
-  <meta charset="utf-8">
-  <title>Dashboard Finanza Pubblica Italia</title>
+<meta charset="utf-8">
+<title>Dashboard Finanza Pubblica Italia</title>
 
-  <style>
-    body{
-      font-family: Arial;
-      background:#f5f5f5;
-      margin:0;
-      padding:30px;
-      text-align:center;
-    }
+<style>
+  body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background:#0b1220;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+  }
 
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
-      gap:15px;
-      margin-top:20px;
-    }
+  .wrap{
+    width:95%;
+    max-width:1000px;
+    text-align:center;
+  }
 
-    .card{
-      background:white;
-      padding:20px;
-      border-radius:12px;
-      box-shadow:0 2px 10px rgba(0,0,0,0.08);
-    }
+  h1{
+    margin-bottom:20px;
+  }
 
-    .value{
-      font-size:24px;
-      font-weight:bold;
-      margin-top:10px;
-    }
-  </style>
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap:15px;
+  }
+
+  .card{
+    background:#111a2e;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 0 20px rgba(0,0,0,0.4);
+  }
+
+  .label{
+    font-size:14px;
+    color:#9ca3af;
+  }
+
+  .value{
+    font-size:26px;
+    font-weight:bold;
+    margin-top:10px;
+    color:#22c55e;
+  }
+
+  .big{
+    font-size:42px;
+  }
+
+</style>
 </head>
 
 <body>
 
-<h1>📊 Finanza Pubblica Italia</h1>
-<p>Dati OpenBDAP / MEF / ISTAT (simulazione strutturata)</p>
+<div class="wrap">
 
-<div class="grid">
+  <h1>📊 Finanza Pubblica Italia (Dinamica)</h1>
 
-  <div class="card">
-    <div>Debito Pubblico</div>
-    <div class="value" id="debito">Caricamento...</div>
-  </div>
+  <div class="grid">
 
-  <div class="card">
-    <div>Debito / PIL</div>
-    <div class="value" id="debitoPil">--</div>
-  </div>
+    <div class="card">
+      <div class="label">Debito Pubblico</div>
+      <div class="value big" id="debito">--</div>
+    </div>
 
-  <div class="card">
-    <div>Interessi annui</div>
-    <div class="value" id="interessi">--</div>
-  </div>
+    <div class="card">
+      <div class="label">Debito / PIL</div>
+      <div class="value" id="debitoPil">--</div>
+    </div>
 
-  <div class="card">
-    <div>Debito pro-capite</div>
-    <div class="value" id="procapite">--</div>
+    <div class="card">
+      <div class="label">Interessi annui stimati</div>
+      <div class="value" id="interessi">--</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Debito pro-capite</div>
+      <div class="value" id="procapite">--</div>
+    </div>
+
   </div>
 
 </div>
 
 <script>
+
 /**
- * ===========================
- * DATI BASE REALISTICI ITALIA
- * ===========================
+ * =========================
+ * BASE MACRO ITALIA (REALISTICA)
+ * =========================
  */
 
-const DEBITO = 3024000000000; // ~3.024 trilioni
-const PIL = 2200000000000;    // ~2.2 trilioni
-const POP = 58900000;         // popolazione
+const POPOLAZIONE = 58900000;
+
+// ~3.024 trilioni € (ordine di grandezza Banca d’Italia/MEF)
+const DEBITO_BASE = 3024000000000;
+
+// PIL nominale stimato
+const PIL = 2200000000000;
+
+// crescita debito (macro media)
+const GROWTH_PER_SECOND = 2500;
+
+// interessi medi debito Italia ~3.5%
+const INTEREST_RATE = 0.035;
+
+const START = new Date("2026-01-01");
 
 function formatEUR(x){
-  return x.toLocaleString("it-IT",{style:"currency",currency:"EUR",maximumFractionDigits:0});
+  return x.toLocaleString("it-IT", {
+    style:"currency",
+    currency:"EUR",
+    maximumFractionDigits:0
+  });
 }
 
-function load(){
+function calc(){
 
-  // Debito
-  document.getElementById("debito").innerText = formatEUR(DEBITO);
+  const now = new Date();
+  const seconds = (now - START) / 1000;
 
-  // Debito / PIL
-  const ratio = (DEBITO / PIL) * 100;
-  document.getElementById("debitoPil").innerText = ratio.toFixed(1) + " %";
+  const debito = DEBITO_BASE + seconds * GROWTH_PER_SECOND;
 
-  // Interessi stimati (media 3.5%)
-  const interessi = DEBITO * 0.035;
+  const debitoPil = (debito / PIL) * 100;
+
+  const interessi = debito * INTEREST_RATE;
+
+  const proCapite = debito / POPOLAZIONE;
+
+  // UI
+  document.getElementById("debito").innerText = formatEUR(debito);
+  document.getElementById("debitoPil").innerText = debitoPil.toFixed(1) + " %";
   document.getElementById("interessi").innerText = formatEUR(interessi);
-
-  // Pro capite
-  const pro = DEBITO / POP;
-  document.getElementById("procapite").innerText = formatEUR(pro);
+  document.getElementById("procapite").innerText = formatEUR(proCapite);
 }
 
-load();
+calc();
+setInterval(calc, 1000);
+
 </script>
 
 </body>
