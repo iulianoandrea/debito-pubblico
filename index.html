@@ -1,21 +1,104 @@
 <!doctype html>
-<html>
+<html lang="it">
 <head>
   <meta charset="utf-8">
-  <title>Debito Pubblico Italia</title>
+  <title>Dashboard Finanza Pubblica Italia</title>
+
+  <style>
+    body{
+      font-family: Arial;
+      background:#f5f5f5;
+      margin:0;
+      padding:30px;
+      text-align:center;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+      gap:15px;
+      margin-top:20px;
+    }
+
+    .card{
+      background:white;
+      padding:20px;
+      border-radius:12px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .value{
+      font-size:24px;
+      font-weight:bold;
+      margin-top:10px;
+    }
+  </style>
 </head>
 
-<body style="font-family:Arial;text-align:center;padding:30px">
+<body>
 
-  <h1>Debito Pubblico Italiano</h1>
+<h1>📊 Finanza Pubblica Italia</h1>
+<p>Dati OpenBDAP / MEF / ISTAT (simulazione strutturata)</p>
 
-  <div id="valore" style="font-size:40px;font-weight:bold">
-    Caricamento...
+<div class="grid">
+
+  <div class="card">
+    <div>Debito Pubblico</div>
+    <div class="value" id="debito">Caricamento...</div>
   </div>
 
-  <p style="color:#666;font-size:12px">
-    Fonte: OpenBDAP / MEF
-  </p>
+  <div class="card">
+    <div>Debito / PIL</div>
+    <div class="value" id="debitoPil">--</div>
+  </div>
+
+  <div class="card">
+    <div>Interessi annui</div>
+    <div class="value" id="interessi">--</div>
+  </div>
+
+  <div class="card">
+    <div>Debito pro-capite</div>
+    <div class="value" id="procapite">--</div>
+  </div>
+
+</div>
+
+<script>
+/**
+ * ===========================
+ * DATI BASE REALISTICI ITALIA
+ * ===========================
+ */
+
+const DEBITO = 3024000000000; // ~3.024 trilioni
+const PIL = 2200000000000;    // ~2.2 trilioni
+const POP = 58900000;         // popolazione
+
+function formatEUR(x){
+  return x.toLocaleString("it-IT",{style:"currency",currency:"EUR",maximumFractionDigits:0});
+}
+
+function load(){
+
+  // Debito
+  document.getElementById("debito").innerText = formatEUR(DEBITO);
+
+  // Debito / PIL
+  const ratio = (DEBITO / PIL) * 100;
+  document.getElementById("debitoPil").innerText = ratio.toFixed(1) + " %";
+
+  // Interessi stimati (media 3.5%)
+  const interessi = DEBITO * 0.035;
+  document.getElementById("interessi").innerText = formatEUR(interessi);
+
+  // Pro capite
+  const pro = DEBITO / POP;
+  document.getElementById("procapite").innerText = formatEUR(pro);
+}
+
+load();
+</script>
 
 </body>
 </html>
