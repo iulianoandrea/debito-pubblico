@@ -1,1 +1,37 @@
+{
+  "debt": 3159000000000,
+  "debtToGDP": 137,
+  "interest": 106000000000,
+  "perCapita": 51000,
+  "lastUpdate": "2026-06-01"
+}
+async function loadData() {
+  try {
+    const res = await fetch(
+      "https://iulianoandrea.github.io/debito-pubblico/data.json",
+      { cache: "no-store" }
+    );
 
+    if (!res.ok) throw new Error("HTTP " + res.status);
+
+    const data = await res.json();
+
+    document.getElementById("gdp").textContent = data.debtToGDP;
+    document.getElementById("interest").textContent =
+      new Intl.NumberFormat("it-IT").format(data.interest);
+
+    document.getElementById("percapita").textContent =
+      new Intl.NumberFormat("it-IT").format(data.perCapita);
+
+    document.getElementById("update").textContent = data.lastUpdate;
+
+    document.getElementById("debt").textContent =
+      "~" + new Intl.NumberFormat("it-IT").format(data.debt) + " €";
+
+  } catch (err) {
+    console.error("Load error:", err);
+    document.getElementById("debt").textContent = "Dati non disponibili";
+  }
+}
+
+loadData();
