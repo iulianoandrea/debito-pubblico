@@ -1,120 +1,36 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Debito Pubblico Italia</title>
-
-  <style>
-    body{
-      font-family: Arial, sans-serif;
-      background:#f5f5f5;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      height:100vh;
-      margin:0;
-    }
-
-    .card{
-      background:white;
-      padding:24px;
-      border-radius:12px;
-      border:1px solid #ddd;
-      text-align:center;
-      width:360px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-
-    h2{
-      font-size:20px;
-      margin-bottom:15px;
-    }
-
-    .value{
-      font-size:32px;
-      font-weight:bold;
-      color:#1a8917;
-      margin:15px 0;
-    }
-
-    .meta{
-      font-size:14px;
-      line-height:1.6;
-      color:#333;
-    }
-
-    .update{
-      font-size:12px;
-      color:#777;
-      margin-top:10px;
-    }
-
-    a{
-      display:inline-block;
-      margin-top:15px;
-      color:#1a8917;
-      font-weight:bold;
-      text-decoration:none;
-    }
-
-    a:hover{
-      text-decoration:underline;
-    }
-  </style>
-</head>
-
-<body>
-
-<div class="card">
-
-  <h2>📊 Debito Pubblico Italia</h2>
-
-  <div id="debt" class="value">--</div>
-
-  <div class="meta">
-    <div>Debito/PIL: <span id="gdp">--</span>%</div>
-    <div>Interessi annui: <span id="interest">--</span> €</div>
-    <div>Pro-capite: <span id="percapita">--</span> €</div>
-
-    <div class="update">
-      Ultimo aggiornamento: <span id="update">--</span>
-    </div>
-  </div>
-
-  <a href="https://iulianoandrea.github.io/debito-pubblico/" target="_blank" rel="noopener">
-    🔗 Dashboard completa
-  </a>
-
-</div>
-
 <script>
-async function loadData() {
+document.addEventListener("DOMContentLoaded", async () => {
   try {
-    const res = await fetch("./data.json");
+    const url = "https://iulianoandrea.github.io/debito-pubblico/data.json";
+
+    const res = await fetch(url, { cache: "no-store" });
+
+    if (!res.ok) throw new Error("HTTP " + res.status);
+
     const data = await res.json();
 
-    document.getElementById("gdp").textContent = data.debtToGDP;
+    const debtEl = document.getElementById("debt");
+    const gdpEl = document.getElementById("gdp");
+    const interestEl = document.getElementById("interest");
+    const perCapitaEl = document.getElementById("percapita");
+    const updateEl = document.getElementById("update");
 
-    document.getElementById("interest").textContent =
-      new Intl.NumberFormat("it-IT").format(data.interest);
-
-    document.getElementById("percapita").textContent =
-      new Intl.NumberFormat("it-IT").format(data.perCapita);
-
-    document.getElementById("update").textContent = data.lastUpdate;
-
-    document.getElementById("debt").textContent =
+    debtEl.textContent =
       "~" + new Intl.NumberFormat("it-IT").format(data.debt) + " €";
 
-  } catch (e) {
-    console.error("Errore caricamento dati:", e);
+    gdpEl.textContent = data.debtToGDP;
+
+    interestEl.textContent =
+      new Intl.NumberFormat("it-IT").format(data.interest);
+
+    perCapitaEl.textContent =
+      new Intl.NumberFormat("it-IT").format(data.perCapita);
+
+    updateEl.textContent = data.lastUpdate;
+
+  } catch (err) {
+    console.error(err);
     document.getElementById("debt").textContent = "Dati non disponibili";
   }
-}
-
-loadData();
+});
 </script>
-
-</body>
-</html>
