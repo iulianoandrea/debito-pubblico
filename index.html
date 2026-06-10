@@ -1,36 +1,27 @@
-<script>
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     const url = "https://iulianoandrea.github.io/debito-pubblico/data.json";
 
     const res = await fetch(url, { cache: "no-store" });
-
     if (!res.ok) throw new Error("HTTP " + res.status);
 
     const data = await res.json();
 
-    const debtEl = document.getElementById("debt");
-    const gdpEl = document.getElementById("gdp");
-    const interestEl = document.getElementById("interest");
-    const perCapitaEl = document.getElementById("percapita");
-    const updateEl = document.getElementById("update");
+    const set = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+      else console.warn("Elemento mancante:", id);
+    };
 
-    debtEl.textContent =
-      "~" + new Intl.NumberFormat("it-IT").format(data.debt) + " €";
-
-    gdpEl.textContent = data.debtToGDP;
-
-    interestEl.textContent =
-      new Intl.NumberFormat("it-IT").format(data.interest);
-
-    perCapitaEl.textContent =
-      new Intl.NumberFormat("it-IT").format(data.perCapita);
-
-    updateEl.textContent = data.lastUpdate;
+    set("debt", "~" + new Intl.NumberFormat("it-IT").format(data.debt) + " €");
+    set("gdp", data.debtToGDP);
+    set("interest", new Intl.NumberFormat("it-IT").format(data.interest));
+    set("percapita", new Intl.NumberFormat("it-IT").format(data.perCapita));
+    set("update", data.lastUpdate);
 
   } catch (err) {
     console.error(err);
-    document.getElementById("debt").textContent = "Dati non disponibili";
+    const el = document.getElementById("debt");
+    if (el) el.textContent = "Dati non disponibili";
   }
 });
-</script>
