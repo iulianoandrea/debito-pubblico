@@ -1,148 +1,119 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="utf-8">
-<title>Dashboard Debito Pubblico Italia</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Debito Pubblico Italia</title>
 
-<style>
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      background:#f5f5f5;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+      margin:0;
+    }
 
-*{
-  box-sizing:border-box;
-}
+    .card{
+      background:white;
+      padding:24px;
+      border-radius:12px;
+      border:1px solid #ddd;
+      text-align:center;
+      width:360px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
 
-body{
-  margin:0;
-  font-family: Arial, sans-serif;
-  background:#0b1220;
-  color:white;
-}
+    h2{
+      font-size:20px;
+      margin-bottom:15px;
+    }
 
-.container{
-  max-width:1000px;
-  margin:auto;
-  padding:40px 20px;
-  text-align:center;
-}
+    .value{
+      font-size:32px;
+      font-weight:bold;
+      color:#1a8917;
+      margin:15px 0;
+    }
 
-h1{
-  margin-bottom:30px;
-}
+    .meta{
+      font-size:14px;
+      line-height:1.6;
+      color:#333;
+    }
 
-/* GRID STABILE */
-.grid{
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap:20px;
-}
+    .update{
+      font-size:12px;
+      color:#777;
+      margin-top:10px;
+    }
 
-/* CARD ANTI-SOVRAPPOSIZIONE */
-.card{
-  background:#111a2e;
-  padding:20px;
-  border-radius:16px;
+    a{
+      display:inline-block;
+      margin-top:15px;
+      color:#1a8917;
+      font-weight:bold;
+      text-decoration:none;
+    }
 
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-
-  min-height:140px;   /* 🔥 BLOCCA COLLASSO */
-  overflow:hidden;
-}
-
-/* LABEL */
-.label{
-  font-size:14px;
-  color:#9ca3af;
-  margin-bottom:10px;
-}
-
-/* VALORE STABILE */
-.value{
-  font-size:26px;
-  font-weight:bold;
-  line-height:1.2;   /* 🔥 EVITA SOVRAPPOSIZIONE */
-  word-break:break-word;
-  color:#22c55e;
-}
-
-/* BIG VALUE */
-.big{
-  font-size:38px;
-}
-
-</style>
-
+    a:hover{
+      text-decoration:underline;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="card">
 
-<h1>📊 Finanza Pubblica Italia</h1>
+  <h2>📊 Debito Pubblico Italia</h2>
 
-<div class="grid">
+  <div id="debt" class="value">--</div>
 
-  <div class="card">
-    <div class="label">Debito Pubblico</div>
-    <div class="value big" id="debito">--</div>
+  <div class="meta">
+    <div>Debito/PIL: <span id="gdp">--</span>%</div>
+    <div>Interessi annui: <span id="interest">--</span> €</div>
+    <div>Pro-capite: <span id="percapita">--</span> €</div>
+
+    <div class="update">
+      Ultimo aggiornamento: <span id="update">--</span>
+    </div>
   </div>
 
-  <div class="card">
-    <div class="label">Debito / PIL</div>
-    <div class="value" id="ratio">--</div>
-  </div>
-
-  <div class="card">
-    <div class="label">Interessi annui</div>
-    <div class="value" id="interessi">--</div>
-  </div>
-
-  <div class="card">
-    <div class="label">Debito pro-capite</div>
-    <div class="value" id="procapite">--</div>
-  </div>
-
-</div>
+  <a href="https://iulianoandrea.github.io/debito-pubblico/" target="_blank" rel="noopener">
+    🔗 Dashboard completa
+  </a>
 
 </div>
 
 <script>
+async function loadData() {
+  try {
+    const res = await fetch("./data.json");
+    const data = await res.json();
 
-const DEBITO_BASE = 3024000000000;
-const PIL = 2200000000000;
-const POP = 58900000;
+    document.getElementById("gdp").textContent = data.debtToGDP;
 
-const GROWTH_SEC = 2500;
-const START = new Date("2026-01-01");
+    document.getElementById("interest").textContent =
+      new Intl.NumberFormat("it-IT").format(data.interest);
 
-function euro(x){
-  return x.toLocaleString("it-IT",{
-    style:"currency",
-    currency:"EUR",
-    maximumFractionDigits:0
-  });
+    document.getElementById("percapita").textContent =
+      new Intl.NumberFormat("it-IT").format(data.perCapita);
+
+    document.getElementById("update").textContent = data.lastUpdate;
+
+    document.getElementById("debt").textContent =
+      "~" + new Intl.NumberFormat("it-IT").format(data.debt) + " €";
+
+  } catch (e) {
+    console.error("Errore caricamento dati:", e);
+    document.getElementById("debt").textContent = "Dati non disponibili";
+  }
 }
 
-function update(){
-
-  const now = new Date();
-  const sec = (now - START) / 1000;
-
-  const debito = DEBITO_BASE + sec * GROWTH_SEC;
-
-  const ratio = (debito / PIL) * 100;
-  const interessi = debito * 0.035;
-  const pro = debito / POP;
-
-  document.getElementById("debito").innerText = euro(debito);
-  document.getElementById("ratio").innerText = ratio.toFixed(1) + "%";
-  document.getElementById("interessi").innerText = euro(interessi);
-  document.getElementById("procapite").innerText = euro(pro);
-}
-
-update();
-setInterval(update, 1000);
-
+loadData();
 </script>
 
 </body>
