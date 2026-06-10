@@ -1,22 +1,25 @@
-{
-  "debt": 3159000000000,
-  "debtToGDP": 137,
-  "interest": 106000000000,
-  "perCapita": 51000,
-  "lastUpdate": "2026-06-01"
-}
 async function loadData() {
   try {
-    const res = await fetch(
-      "https://iulianoandrea.github.io/debito-pubblico/data.json",
-      { cache: "no-store" }
-    );
+    const url = "https://iulianoandrea.github.io/debito-pubblico/data.json";
 
-    if (!res.ok) throw new Error("HTTP " + res.status);
+    const res = await fetch(url, { cache: "no-store" });
 
-    const data = await res.json();
+    // 🔴 controllo OBBLIGATORIO
+    if (!res.ok) {
+      throw new Error("HTTP error: " + res.status);
+    }
+
+    const text = await res.text();
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      throw new Error("JSON non valido");
+    }
 
     document.getElementById("gdp").textContent = data.debtToGDP;
+
     document.getElementById("interest").textContent =
       new Intl.NumberFormat("it-IT").format(data.interest);
 
@@ -29,7 +32,7 @@ async function loadData() {
       "~" + new Intl.NumberFormat("it-IT").format(data.debt) + " €";
 
   } catch (err) {
-    console.error("Load error:", err);
+    console.error("Errore loadData:", err);
     document.getElementById("debt").textContent = "Dati non disponibili";
   }
 }
