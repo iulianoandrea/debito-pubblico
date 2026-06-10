@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Debito Pubblico Italia</title>
+  <title>Debito Pubblico Italia Live</title>
 
   <style>
     body{
@@ -39,7 +39,7 @@
       line-height:1.6;
     }
 
-    .update{
+    .small{
       font-size:12px;
       color:#777;
       margin-top:10px;
@@ -50,46 +50,46 @@
 <body>
 
 <div class="card">
-  <h2>📊 Debito Pubblico Italia</h2>
 
-  <div id="debt" class="value">~3.159.000.000.000 €</div>
+  <h2>📊 Debito Pubblico Italia (stima live)</h2>
+
+  <div id="debt" class="value">--</div>
 
   <div class="meta">
-    <div>Debito/PIL: <span id="gdp">137</span>%</div>
-    <div>Interessi annui: <span id="interest">106.000.000.000</span> €</div>
-    <div>Pro-capite: <span id="percapita">51.000</span> €</div>
+    <div>Debito/PIL: 137%</div>
+    <div>Interessi annui: 106.000.000.000 €</div>
+    <div>Pro-capite: 51.000 €</div>
 
-    <div class="update">
-      Ultimo aggiornamento: <span id="update">--</span>
-    </div>
+    <div class="small">Aggiornamento continuo stimato</div>
   </div>
+
 </div>
 
 <script>
-async function loadData() {
-  try {
-    const res = await fetch("data.json?v=" + Date.now());
-    if (!res.ok) throw new Error("HTTP " + res.status);
+const BASE_DEBT = 3159000000000;
 
-    const data = await res.json();
+// deficit annuo stimato (modificabile)
+const ANNUAL_DEFICIT = 100000000000;
 
-    const set = (id, val) => {
-      const el = document.getElementById(id);
-      if (el && val !== undefined) el.textContent = val;
-    };
+// incremento al secondo
+const INCREMENT_PER_SECOND = ANNUAL_DEFICIT / (365 * 24 * 60 * 60);
 
-    set("debt", "~" + new Intl.NumberFormat("it-IT").format(data.debt) + " €");
-    set("gdp", data.debtToGDP);
-    set("interest", new Intl.NumberFormat("it-IT").format(data.interest));
-    set("percapita", data.perCapita);
-    set("update", data.lastUpdate);
+let currentDebt = BASE_DEBT;
+let lastTime = Date.now();
 
-  } catch (e) {
-    console.error(e);
-  }
+function update() {
+  const now = Date.now();
+  const diffSeconds = (now - lastTime) / 1000;
+
+  currentDebt += diffSeconds * INCREMENT_PER_SECOND;
+  lastTime = now;
+
+  document.getElementById("debt").textContent =
+    "~" + new Intl.NumberFormat("it-IT").format(Math.floor(currentDebt)) + " €";
 }
 
-loadData();
+update();
+setInterval(update, 1000);
 </script>
 
 </body>
